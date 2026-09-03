@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrativo - Organización VID</title>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <style>
+        :root {
+            --primary: #0077b6;
+            --primary-dark: #023e8a;
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --border: #dce1e3;
+            --success: #2a9d8f;
+            --danger: #e63946;
+            --sidebar-width: 280px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg); color: #333; }
+
+        .layout { display: flex; min-height: 100vh; }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--primary-dark);
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .sidebar h2 { font-size: 1.2rem; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 10px; }
+        .sidebar-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+        .sidebar-btn:hover { background: rgba(255,255,255,0.2); }
+        .sidebar-btn.active { background: var(--primary); }
+
+        /* Formulario módulo en sidebar */
+        .form-modulo {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        .form-modulo h3 { font-size: 0.9rem; margin-bottom: 10px; }
+        .form-modulo input {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+        .form-modulo button {
+            width: 100%;
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Lista de módulos */
+        .modulos-list {
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .modulo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+        }
+        .modulo-item span { flex: 1; }
+        .modulo-actions { display: flex; gap: 5px; }
+        .modulo-actions button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+            padding: 2px 5px;
+        }
+        .modulo-actions button:hover { text-decoration: underline; }
+
+        /* Contenido principal */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .header h1 { color: var(--primary-dark); font-size: 1.5rem; }
+
+        /* Tarjetas de eventos */
+        .eventos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .evento-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border-left: 4px solid var(--primary);
+        }
+        .evento-card h3 { color: var(--primary-dark); margin-bottom: 10px; font-size: 1.1rem; }
+        .evento-card .info { font-size: 0.85rem; color: #666; margin-bottom: 5px; }
+        .evento-card .especialidades {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        .evento-card .tag {
+            background: #e3f2fd;
+            color: var(--primary-dark);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+        .evento-card .btn-acceder {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .evento-card .btn-acceder:hover { background: var(--primary-dark); }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal h2 { color: var(--primary-dark); margin-bottom: 20px; }
+        .modal .form-group { margin-bottom: 15px; }
+        .modal label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
+        .modal input, .modal select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        .modal .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        .modal .btn-cancel {
+            flex: 1;
+            background: #ccc;
+            color: #333;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .modal .btn-submit {
+            flex: 1;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Multi-select */
+        .multi-select {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .multi-select label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 0;
+            font-weight: normal;
+            cursor: pointer;
+        }
+        .multi-select label:hover { background: #f5f5f5; }
+        .search-filter {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+        }
+
+        /* Sin eventos */
+        .no-eventos {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+            background: var(--card-bg);
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h2>Gestión de Eventos</h2>
+            <button class="sidebar-btn active" onclick="mostrarSeccion('eventos', this)">📋 Eventos</button>
+            <button class="sidebar-btn" onclick="mostrarSeccion('crear-evento', this)">➕ Crear Evento</button>
+
+            <!-- Formulario crear módulo -->
+            <div class="form-modulo">
+                <h3>Nuevo Módulo/Stand</h3>
+                <input type="text" id="nuevo-modulo" placeholder="Nombre del módulo">
+                <button onclick="crearModulo()">Agregar</button>
+            </div>
+
+            <!-- Lista de módulos existentes -->
+            <div class="modulos-list" id="lista-modulos-sidebar">
+                <!-- Se carga dinámicamente -->
+            </div>
+
+            <!-- Formulario crear experiencia VID -->
+            <div class="form-modulo" style="margin-top: 15px;">
+                <h3>✨ Nueva Experiencia VID</h3>
+                <input type="text" id="nueva-experiencia" placeholder="Nombre de la experiencia">
+                <button onclick="crearExperiencia()">Agregar</button>
+            </div>
+
+            <!-- Lista de experiencias existentes -->
+            <div class="modulos-list" id="lista-experiencias-sidebar">
+                <!-- Se carga dinámicamente -->
+            </div>
+        </aside>
+
+        <!-- Contenido principal -->
+        <main class="main-content">
+            <!-- Sección: Lista de eventos -->
+            <div id="seccion-eventos">
+                <div class="header">
+                    <h1>Eventos Activos</h1>
+                </div>
+                <div id="eventos-container" class="eventos-grid">
+                    <!-- Tarjetas de eventos se cargan dinámicamente -->
+                </div>
+            </div>
+
+            <!-- Sección: Crear evento -->
+            <div id="seccion-crear-evento" style="display: none;">
+                <div class="header">
+                    <h1>Crear Nuevo Evento</h1>
+                </div>
+                <div style="background: var(--card-bg); padding: 25px; border-radius: 12px; max-width: 600px;">
+                    <form id="form-crear-evento" onsubmit="crearEvento(event)">
+                        <div class="form-group">
+                            <label>Nombre del Evento *</label>
+                            <input type="text" name="nombre_evento" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Lugar del Evento *</label>
+                            <input type="text" name="lugar_evento" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha del Evento *</label>
+                            <input type="date" name="fecha_evento" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Obra </label>
+                            <select name="id_obra" >
+                                <option value="">Seleccione una obra...</option>
+                                {% for obra in obras %}
+                                <option value="{{ obra.id_obra }}">{{ obra.nombre_obra }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Módulos/Stands Participantes</label>
+                            <input type="text" class="search-filter" id="filter-modulos" placeholder="Buscar módulo..." oninput="filtrarModulos()">
+                            <div class="multi-select" id="lista-modulos">
+                                <!-- Checkboxes se cargan dinámicamente -->
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 15px; padding: 12px; background: rgba(0, 119, 182, 0.05); border-radius: 8px; border: 1px dashed var(--primary);">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 0;">
+                                <input type="checkbox" id="check-habilitar-experiencias" onchange="toggleSeccionExperiencias(this.checked)" style="width: auto;">
+                                <span style="font-weight: 600; color: var(--primary-dark);">✨ Habilitar pestaña de Experiencias VID en este evento</span>
+                            </label>
+                            <div id="grupo-experiencias" style="display: none; margin-top: 12px;">
+                                <label style="font-size: 0.85rem; color: #555;">Seleccione las actividades que estarán disponibles:</label>
+                                <input type="text" class="search-filter" id="filter-experiencias" placeholder="Buscar experiencia..." oninput="filtrarExperiencias()">
+                                <div class="multi-select" id="lista-experiencias">
+                                    <!-- Checkboxes se cargan dinámicamente -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button type="button" class="btn-cancel" onclick="mostrarSeccion('eventos')">Cancelar</button>
+                            <button type="submit" class="btn-submit">Crear Evento</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de éxito -->
+    <div class="modal-overlay" id="modal-exito">
+        <div class="modal">
+            <h2>✅ Evento Creado</h2>
+            <p>El evento se ha creado exitosamente.</p>
+            <div class="btn-group">
+                <button class="btn-submit" onclick="cerrarModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Cargar eventos al iniciar
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarEventos();
+            cargarModulosSidebar();
+        });
+
+        function mostrarSeccion(seccion, btnElement = null) {
+            document.getElementById('seccion-eventos').style.display = seccion === 'eventos' ? 'block' : 'none';
+            document.getElementById('seccion-crear-evento').style.display = seccion === 'crear-evento' ? 'block' : 'none';
+
+            const botones = document.querySelectorAll('.sidebar-btn');
+            botones.forEach(btn => btn.classList.remove('active'));
+
+            if (btnElement) {
+                btnElement.classList.add('active');
+            } else {
+                if (seccion === 'eventos' && botones[0]) botones[0].classList.add('active');
+                if (seccion === 'crear-evento' && botones[1]) botones[1].classList.add('active');
+            }
+
+            if (seccion === 'crear-evento') {
+                cargarModulos();
+            }
+        }
+
+        async function cargarEventos() {
+            const container = document.getElementById('eventos-container');
+            try {
+                const response = await fetch('/eventos');
+                const eventos = await response.json();
+
+                if (eventos.length === 0) {
+                    container.innerHTML = '<div class="no-eventos">No hay eventos creados. Cree uno nuevo desde el sidebar.</div>';
+                    return;
+                }
+
+                container.innerHTML = eventos.map(evento => `
+                    <div class="evento-card">
+                        <h3>${evento.nombre_evento}</h3>
+                        <p class="info">📍 ${evento.lugar_evento}</p>
+                        <p class="info">📅 ${evento.fecha_evento}</p>
+                        <div class="especialidades">
+                            ${evento.modulos.map(mod => `<span class="tag">${mod}</span>`).join('')}
+                        </div>
+                        <button class="btn-acceder" onclick="accederEvento(${evento.id_evento})">Acceder al Evento</button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                container.innerHTML = '<div class="no-eventos">Error al cargar eventos.</div>';
+            }
+        }
+
+        async function cargarModulos() {
+            const container = document.getElementById('lista-modulos');
+            try {
+                const response = await fetch('/modulos');
+                const modulos = await response.json();
+
+                container.innerHTML = modulos.map(mod => `
+                    <label>
+                        <input type="checkbox" name="modulos" value="${mod.id_especialidad}">
+                        ${mod.nombre_modulo}
+                    </label>
+                `).join('');
+            } catch (error) {
+                container.innerHTML = '<p>Error al cargar módulos.</p>';
+            }
+        }
+
+        async function cargarModulosSidebar() {
+            const container = document.getElementById('lista-modulos-sidebar');
+            try {
+                const response = await fetch('/modulos');
+                const modulos = await response.json();
+
+                if (modulos.length === 0) {
+                    container.innerHTML = '<p style="font-size:0.8rem; opacity:0.7;">No hay módulos creados</p>';
+                    return;
+                }
+
+                container.innerHTML = modulos.map(mod => `
+                    <div class="modulo-item">
+                        <span>${mod.nombre_modulo}</span>
+                        <div class="modulo-actions">
+                            <button onclick="editarModulo(${mod.id_especialidad}, '${mod.nombre_modulo}')">✏️</button>
+                            <button onclick="eliminarModulo(${mod.id_especialidad})">🗑️</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                container.innerHTML = '<p style="font-size:0.8rem; opacity:0.7;">Error al cargar</p>';
+            }
+        }
+
+        function filtrarModulos() {
+            const filtro = document.getElementById('filter-modulos').value.toLowerCase();
+            const labels = document.querySelectorAll('#lista-modulos label');
+            labels.forEach(label => {
+                const texto = label.textContent.toLowerCase();
+                label.style.display = texto.includes(filtro) ? 'flex' : 'none';
+            });
+        }
+
+        async function crearEvento(e) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+
+            const checkboxes = document.querySelectorAll('input[name="modulos"]:checked');
+            const modulos = Array.from(checkboxes).map(cb => parseInt(cb.value));
+
+            const idObraVal = formData.get('id_obra');
+
+            const data = {
+                nombre_evento: formData.get('nombre_evento'),
+                lugar_evento: formData.get('lugar_evento'),
+                fecha_evento: formData.get('fecha_evento'),
+                id_obra: idObraVal ? parseInt(idObraVal) : null,
+                modulos: modulos
+            };
+
+            try {
+                const response = await fetch('/crear_evento', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    form.reset();
+                    mostrarSeccion('eventos');
+                    await cargarEventos();
+                    document.getElementById('modal-exito').classList.add('active');
+                } else {
+                    const result = await response.json().catch(() => ({}));
+                    const msg = result.detail 
+                        ? (Array.isArray(result.detail) ? result.detail.map(d => d.msg).join(', ') : JSON.stringify(result.detail)) 
+                        : (result.message || 'Error en el servidor');
+                    alert(`Error al crear el evento: ${msg}`);
+                }
+            } catch (error) {
+                console.error('Error al crear el evento:', error);
+                alert('Error al crear el evento: ' + (error.message || 'Error de conexión'));
+            }
+        }
+
+        async function crearModulo() {
+            const nombre = document.getElementById('nuevo-modulo').value.trim();
+
+            if (!nombre) {
+                alert('Ingrese el nombre del módulo');
+                return;
+            }
+
+            try {
+                const response = await fetch('/crear_modulo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre_modulo: nombre })
+                });
+
+                if (response.ok) {
+                    document.getElementById('nuevo-modulo').value = '';
+                    cargarModulosSidebar();
+                    alert('Módulo creado exitosamente');
+                }
+            } catch (error) {
+                alert('Error al crear el módulo');
+            }
+        }
+
+        async function editarModulo(id, nombreActual) {
+            const nuevoNombre = prompt('Editar nombre del módulo:', nombreActual);
+            if (nuevoNombre === null || nuevoNombre.trim() === '') return;
+
+            try {
+                const response = await fetch(`/modulos/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre_modulo: nuevoNombre.trim() })
+                });
+
+                if (response.ok) {
+                    cargarModulosSidebar();
+                }
+            } catch (error) {
+                alert('Error al editar el módulo');
+            }
+        }
+
+        async function eliminarModulo(id) {
+            if (!confirm('¿Está seguro de eliminar este módulo?')) return;
+
+            try {
+                const response = await fetch(`/modulos/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    cargarModulosSidebar();
+                }
+            } catch (error) {
+                alert('Error al eliminar el módulo');
+            }
+        }
+
+        function accederEvento(id) {
+            window.location.href = `/evento/${id}`;
+        }
+
+        function cerrarModal() {
+            document.getElementById('modal-exito').classList.remove('active');
+        }
+    </script>
+</body>
+</html>

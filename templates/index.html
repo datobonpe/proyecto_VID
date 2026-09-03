@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Ruta del Cuidado VID</title>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <style>
+        :root {
+            --primary: #0077b6;
+            --primary-dark: #023e8a;
+            --secondary: #00b4d8;
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text: #333;
+            --border: #dce1e3;
+            --success: #2a9d8f;
+            --danger: #e63946;
+            --disabled: #a8a8a8;
+            --sidebar-width: 250px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); }
+
+        /* Layout principal */
+        .app-layout { display: flex; min-height: 100vh; }
+
+        /* Contenido principal */
+        .main-content { flex: 1; padding: 20px; overflow-y: auto; }
+
+        /* Sidebar derecha - Módulos */
+        .modules-sidebar {
+            width: var(--sidebar-width);
+            background: var(--primary-dark);
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .modules-sidebar h3 {
+            font-size: 1rem;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        .module-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            transition: background 0.2s;
+        }
+        .module-btn:hover { background: rgba(255,255,255,0.2); }
+        .module-btn.active { background: var(--primary); }
+        .module-btn:first-of-type { background: var(--success); }
+
+        /* Header con nombre del evento */
+        .event-header {
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .event-header h1 { color: var(--primary-dark); font-size: 1.3rem; }
+        .event-header .back-btn {
+            background: #ccc;
+            color: #333;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+
+        /* Barra de búsqueda */
+        .search-bar {
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .search-bar label { font-weight: bold; font-size: 0.9rem; white-space: nowrap; }
+        .search-bar input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        .search-bar button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .search-bar button:hover { background: var(--primary-dark); }
+
+        /* Banner de estado */
+        .status-banner {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .status-locked { background: #ffe3e3; color: var(--danger); border: 1px solid #f2a6a6; }
+        .status-unlocked { background: #e8f5e9; color: var(--success); border: 1px solid #a5d6a7; }
+
+        /* Contenido de módulo */
+        .module-content {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .module-title {
+            color: var(--primary-dark);
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        /* Grid de formulario */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #555;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        .form-group input:disabled,
+        .form-group select:disabled,
+        .form-group textarea:disabled {
+            background: #f0f0f0;
+            cursor: not-allowed;
+        }
+        .form-group.full-width { grid-column: 1 / -1; }
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        /* Botones */
+        .btn-submit {
+            margin-top: 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-block;
+            float: right;
+        }
+        .btn-submit:disabled { background: var(--disabled); cursor: not-allowed; }
+        .btn-success { background: var(--success); }
+        .clearfix::after { content: ""; clear: both; display: table; }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+        }
+        .modal h2 { color: var(--primary-dark); margin-bottom: 15px; }
+        .modal p { margin-bottom: 20px; color: #666; }
+        .modal .btn-group { display: flex; gap: 10px; }
+        .modal button {
+            flex: 1;
+            padding: 10px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .modal .btn-cancel { background: #ccc; color: #333; }
+        .modal .btn-ok { background: var(--primary); color: white; }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Contenido principal -->
+        <main class="main-content">
+            <!-- Header del evento -->
+            <div class="event-header">
+                <div>
+                    <h1>📅 {{ evento.nombre_evento if evento else "Evento VID" }}</h1>
+                    {% if evento %}
+                    <p style="font-size: 0.85rem; color: #555; margin-top: 4px;">
+                        📍 {{ evento.lugar_evento }} &nbsp;|&nbsp; 🗓️ {{ evento.fecha_evento }}
+                    </p>
+                    {% endif %}
+                </div>
+                <a href="/dashboard" class="back-btn">← Volver al Dashboard</a>
+            </div>
+
+            <!-- Barra de búsqueda de usuario -->
+            <div class="search-bar">
+                <label>🔍 Buscar Usuario:</label>
+                <input type="number" id="search-cedula" placeholder="Ingrese cédula...">
+                <button onclick="buscarUsuario()">Buscar</button>
+            </div>
+
+            <!-- Banner de estado -->
+            <div id="status-banner" class="status-banner status-locked">
+                <span>🔒 Debe buscar y seleccionar un usuario para habilitar los módulos</span>
+                <span id="active-user">Usuario: Ninguno</span>
+            </div>
+
+            <!-- Contenido del módulo activo -->
+            <div class="module-content" id="module-container">
+                <h2 class="module-title" id="module-title">Módulo de Registro</h2>
+                <div id="module-form">
+                    <!-- Contenido dinámico -->
+                </div>
+            </div>
+        </main>
+
+        <!-- Sidebar de módulos -->
+        <aside class="modules-sidebar">
+            <h3>Módulos del Evento</h3>
+            <button class="module-btn active" onclick="cambiarModulo('registro', this)">📝 Registro de Usuarios</button>
+            {% for modulo in modulos %}
+            <button class="module-btn" onclick="cambiarModulo('{{ modulo.id_especialidad }}', this)">
+                {{ modulo.nombre_especialidad }}
+            </button>
+            {% endfor %}
+            {% if not modulos %}
+            <p style="font-size: 0.8rem; opacity: 0.7; padding: 10px 0;">No hay módulos asignados a este evento.</p>
+            {% endif %}
+        </aside>
+    </div>
+
+    <!-- Modal de usuario no encontrado -->
+    <div class="modal-overlay" id="modal-no-user">
+        <div class="modal">
+            <h2>Usuario No Encontrado</h2>
+            <p>No se encontró ningún usuario con esa cédula. ¿Desea registrarlo?</p>
+            <div class="btn-group">
+                <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn-ok" onclick="irARegistro()">Registrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de éxito -->
+    <div class="modal-overlay" id="modal-exito">
+        <div class="modal">
+            <h2>✅ Guardado Exitoso</h2>
+            <p id="exito-mensaje">Los datos se han guardado correctamente.</p>
+            <div class="btn-group">
+                <button class="btn-ok" onclick="cerrarModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Estado global
+        let usuarioActual = null;
+        let moduloActual = 'registro';
+        let modulosHabilitados = ['registro']; // Solo registro está habilitado inicialmente
+
+        // Contenido de cada módulo
+        const modulosContenido = {
+            'registro': `
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Tipo de Documento *</label>
+                        <select id="d_tipo_doc" name="tipo_documento">
+                            <option value="" disabled selected>Seleccione...</option>
+                            <option value="CC">Cédula de Ciudadanía (CC)</option>
+                            <option value="CE">Cédula de Extranjería (CE)</option>
+                            <option value="TI">Tarjeta de Identidad (TI)</option>
+                            <option value="PA">Pasaporte (PA)</option>
+                            <option value="PPT">Permiso por protección temporal (PPT)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Número de Documento *</label>
+                        <input type="text" id="d_cedula" name="numero_documento">
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre Completo *</label>
+                        <input type="text" id="d_nombre" name="nombre_completo">
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha de Nacimiento *</label>
+                        <input type="date" id="d_fecha_nac" name="fecha_nacimiento">
+                    </div>
+                    <div class="form-group">
+                        <label>Sexo Biológico *</label>
+                        <select id="d_sexo" name="sexo">
+                            <option value="" disabled selected>Seleccione...</option>
+                            <option value="F">Femenino</option>
+                            <option value="M">Masculino</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Correo Electrónico *</label>
+                        <input type="email" id="d_correo" name="email">
+                    </div>
+                    <div class="form-group">
+                        <label>Celular *</label>
+                        <input type="tel" id="d_celular" name="celular" pattern="[0-9]{10}">
+                    </div>
+                    <div class="form-group">
+                        <label>Lugar de Residencia *</label>
+                        <input type="text" id="d_residencia" name="lugar_residencia">
+                    </div>
+                    <div class="form-group">
+                        <label>Ocupación *</label>
+                        <input type="text" id="d_ocupacion" name="ocupacion">
+                    </div>
+                    <div class="form-group">
+                        <label>Preferencia de Contacto *</label>
+                        <select id="d_contacto" name="preferencia_contacto">
+                            <option value="" disabled selected>Seleccione...</option>
+                            <option value="WhatsApp">WhatsApp</option>
+                            <option value="Llamada">Llamada Telefónica</option>
+                            <option value="Correo">Correo Electrónico</option>
+                            <option value="SMS">Mensaje de Texto (SMS)</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="d_autorizacion" name="autorizacion_tratamiento_datos" value="true">
+                            Autorizo el tratamiento de mis datos personales *
+                        </label>
+                    </div>
+                </div>
+                <button type="button" class="btn-submit btn-success" onclick="guardarRegistro()">💾 Guardar Registro</button>
+            `,
+            'cardiovascular': `
+                <div class="form-grid">
+                    <div class="form-group"><label>Género</label><select id="d_genero"><option value="">Seleccionar...</option><option value="Masculino">Masculino</option><option value="Femenino">Femenino</option></select></div>
+                    <div class="form-group"><label>Edad</label><input type="number" id="d_edad"></div>
+                    <div class="form-group"><label>Tabaquismo</label><select id="d_tabaquismo"><option value="">Seleccionar...</option><option value="Si">Sí</option><option value="No">No</option></select></div>
+                    <div class="form-group"><label>Dislipidemia</label><select id="d_dislipidemia"><option value="">Seleccionar...</option><option value="Si">Sí</option><option value="No">No</option><option value="No sabe">No sabe</option></select></div>
+                    <div class="form-group"><label>Peso (kg)</label><input type="number" step="0.1" id="d_peso" oninput="calcularIMC()"></div>
+                    <div class="form-group"><label>Talla (cm)</label><input type="number" id="d_talla" oninput="calcularIMC()"></div>
+                    <div class="form-group"><label>IMC</label><input type="text" id="d_imc" readonly style="background:#eee;"></div>
+                    <div class="form-group"><label>Presión Arterial</label><input type="text" id="d_pa" placeholder="Ej: 120/80"></div>
+                    <div class="form-group"><label>Glicemia</label><input type="number" id="d_glicemia"></div>
+                </div>
+                <button type="button" class="btn-submit" onclick="guardarModulo('cardiovascular')">💾 Guardar Cardiovascular</button>
+            `,
+            'odontologia': `
+                <div class="form-grid">
+                    <div class="form-group full-width"><label>Necesidad de Servicio (Odontología)</label><input type="text" id="d_nec_odon" placeholder="Indicado por el profesional..."></div>
+                    <div class="form-group full-width"><label>Observaciones Odontológicas</label><textarea id="d_obs_odon" rows="3" placeholder="Ej: Llamar en horario de la tarde..."></textarea></div>
+                </div>
+                <button type="button" class="btn-submit" onclick="guardarModulo('odontologia')">💾 Guardar Odontología</button>
+            `,
+            'dermatologia': `
+                <div class="form-grid">
+                    <div class="form-group full-width"><label>Necesidad de Servicio (Dermatología)</label><input type="text" id="d_nec_derma" placeholder="Indicado por el profesional..."></div>
+                    <div class="form-group full-width"><label>Observaciones Dermatológicas</label><textarea id="d_obs_derma" rows="3"></textarea></div>
+                </div>
+                <button type="button" class="btn-submit" onclick="guardarModulo('dermatologia')">💾 Guardar Dermatología</button>
+            `,
+            'fisico_cognitivo': `
+                <div class="form-grid">
+                    <div class="form-group"><label>Estado Cognitivo</label><input type="text" id="d_est_cognitivo"></div>
+                    <div class="form-group"><label>Observaciones (Cognitivo)</label><textarea id="d_obs_cognitivo" rows="2"></textarea></div>
+                    <div class="form-group"><label>Estado Físico</label><input type="text" id="d_est_fisico"></div>
+                    <div class="form-group"><label>Observaciones (Física)</label><textarea id="d_obs_fisico" rows="2"></textarea></div>
+                    <div class="form-group"><label>Estado Mental</label><input type="text" id="d_est_mental"></div>
+                    <div class="form-group"><label>Observaciones (Psicología)</label><textarea id="d_obs_mental" rows="2"></textarea></div>
+                </div>
+                <button type="button" class="btn-submit" onclick="guardarModulo('fisico_cognitivo')">💾 Guardar Físico/Cognitivo</button>
+            `,
+            'experiencias': `
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label>¿El usuario fue donante efectivo de sangre?</label>
+                    <select id="d_donacion" style="width: 200px;"><option value="No">No</option><option value="Si">Sí</option></select>
+                </div>
+                <h3 style="margin-bottom: 10px; font-size:1rem; color: var(--primary);">Participación en Actividades VID</h3>
+                <div class="checkbox-grid">
+                    <label class="checkbox-item"><input type="checkbox" id="d_tienda"> Tienda</label>
+                    <label class="checkbox-item"><input type="checkbox" id="d_salon"> Salón de Experiencias</label>
+                    <label class="checkbox-item"><input type="checkbox" id="d_biodanza"> Biodanza</label>
+                    <label class="checkbox-item"><input type="checkbox" id="d_tejedores"> Tejedores</label>
+                    <label class="checkbox-item"><input type="checkbox" id="d_mapa"> Mapa de los Sueños</label>
+                    <label class="checkbox-item"><input type="checkbox" id="d_charla"> Charla Médica</label>
+                    <label class="checkbox-item"><input type="checkbox" id="d_taichi"> Enfoque TAICHI</label>
+                </div>
+                <button type="button" class="btn-submit" onclick="guardarModulo('experiencias')">💾 Guardar Experiencias</button>
+            `
+        };
+
+        // Buscar usuario
+        async function buscarUsuario() {
+            const cedula = document.getElementById('search-cedula').value.trim();
+            if (!cedula) {
+                alert('Ingrese un número de cédula');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/buscar_usuario_api?numero_documento=${cedula}`);
+                const data = await response.json();
+
+                if (data.encontrado) {
+                    usuarioActual = data.usuario;
+                    document.getElementById('active-user').textContent = `Usuario: ${data.usuario.nombre_completo} (${cedula})`;
+                    document.getElementById('status-banner').className = 'status-banner status-unlocked';
+                    document.getElementById('status-banner').children[0].textContent = '🔓 Usuario habilitado. Puede completar los módulos.';
+                    habilitarModulos();
+                    cargarDatosUsuario();
+                } else {
+                    document.getElementById('modal-no-user').classList.add('active');
+                }
+            } catch (error) {
+                alert('Error al buscar el usuario');
+            }
+        }
+
+        // Habilitar módulos (excepto registro que siempre está habilitado)
+        function habilitarModulos() {
+            modulosHabilitados = ['registro'];
+            document.querySelectorAll('.module-btn').forEach((btn, index) => {
+                if (index > 0) { // Todos excepto registro
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                    const moduloId = btn.getAttribute('onclick').match(/cambiarModulo\('([^']+)'/)[1];
+                    modulosHabilitados.push(moduloId);
+                }
+            });
+        }
+
+        // Cambiar módulo activo
+        function cambiarModulo(moduloId, btnElement) {
+            if (!modulosHabilitados.includes(moduloId)) {
+                alert('Debe buscar y seleccionar un usuario primero');
+                return;
+            }
+
+            moduloActual = moduloId;
+            document.querySelectorAll('.module-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+
+            const container = document.getElementById('module-form');
+            const title = document.getElementById('module-title');
+
+            if (moduloId === 'registro') {
+                title.textContent = 'Módulo de Registro de Usuarios';
+                container.innerHTML = modulosContenido['registro'];
+                if (usuarioActual) cargarDatosUsuario();
+            } else {
+                const btnText = btnElement.textContent.trim();
+                title.textContent = btnText;
+
+                // Buscar contenido por ID o coincidencia en el nombre
+                const normalizar = (t) => (t || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+                const clave = normalizar(btnText);
+
+                let contenido = modulosContenido[moduloId] || modulosContenido[clave];
+                if (!contenido) {
+                    for (const k in modulosContenido) {
+                        if (clave.includes(k) || k.includes(clave)) {
+                            contenido = modulosContenido[k];
+                            break;
+                        }
+                    }
+                }
+
+                if (!contenido) {
+                    contenido = `
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label>Atención / Observaciones para ${btnText}</label>
+                                <textarea id="d_obs_${moduloId}" rows="4" placeholder="Ingrese las observaciones o diagnóstico del profesional..."></textarea>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-submit" onclick="guardarModulo('${btnText}')">💾 Guardar ${btnText}</button>
+                    `;
+                }
+
+                container.innerHTML = contenido;
+            }
+        }
+
+        // Cargar datos del usuario en los campos
+        function cargarDatosUsuario() {
+            if (!usuarioActual) return;
+            const u = usuarioActual;
+            const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+            setVal('d_tipo_doc', u.tipo_documento);
+            setVal('d_cedula', u.numero_documento);
+            setVal('d_nombre', u.nombre_completo);
+            setVal('d_fecha_nac', u.fecha_nacimiento);
+            setVal('d_sexo', u.sexo);
+            setVal('d_correo', u.email);
+            setVal('d_celular', u.celular);
+            setVal('d_residencia', u.lugar_residencia);
+            setVal('d_ocupacion', u.ocupacion);
+            setVal('d_contacto', u.preferencia_contacto);
+        }
+
+        // Guardar registro de usuario
+        async function guardarRegistro() {
+            const data = {
+                tipo_documento: document.getElementById('d_tipo_doc').value,
+                numero_documento: document.getElementById('d_cedula').value,
+                nombre_completo: document.getElementById('d_nombre').value,
+                fecha_nacimiento: document.getElementById('d_fecha_nac').value,
+                sexo: document.getElementById('d_sexo').value,
+                email: document.getElementById('d_correo').value,
+                celular: document.getElementById('d_celular').value,
+                lugar_residencia: document.getElementById('d_residencia').value,
+                ocupacion: document.getElementById('d_ocupacion').value,
+                preferencia_contacto: document.getElementById('d_contacto').value,
+                autorizacion_tratamiento_datos: document.getElementById('d_autorizacion').checked
+            };
+
+            try {
+                const response = await fetch('/guardar_bienvenida_api', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    usuarioActual = result.usuario;
+                    document.getElementById('exito-mensaje').textContent = 'Usuario registrado exitosamente.';
+                    document.getElementById('modal-exito').classList.add('active');
+                    habilitarModulos();
+                }
+            } catch (error) {
+                alert('Error al guardar el registro');
+            }
+        }
+
+        // Guardar otros módulos
+        async function guardarModulo(modulo) {
+            if (!usuarioActual) {
+                alert('Debe seleccionar un usuario primero');
+                return;
+            }
+
+            const data = { numero_documento: usuarioActual.numero_documento, modulo: modulo };
+
+            try {
+                const response = await fetch('/guardar_modulo_api', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    document.getElementById('exito-mensaje').textContent = `Módulo ${modulo} guardado exitosamente.`;
+                    document.getElementById('modal-exito').classList.add('active');
+                }
+            } catch (error) {
+                alert('Error al guardar el módulo');
+            }
+        }
+
+        // Ir a registro
+        function irARegistro() {
+            cerrarModal();
+            const primerBtn = document.querySelector('.module-btn');
+            cambiarModulo('registro', primerBtn);
+        }
+
+        // Cerrar modales
+        function cerrarModal() {
+            document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+        }
+
+        // Calcular IMC
+        function calcularIMC() {
+            const peso = parseFloat(document.getElementById('d_peso')?.value);
+            const talla = parseFloat(document.getElementById('d_talla')?.value);
+            if (peso > 0 && talla > 0) {
+                const tallaM = talla / 100;
+                document.getElementById('d_imc').value = (peso / (tallaM * tallaM)).toFixed(1);
+            }
+        }
+
+        // Inicializar módulos deshabilitados
+        document.querySelectorAll('.module-btn:not(:first-child)').forEach(btn => {
+            btn.style.opacity = '0.5';
+            btn.style.pointerEvents = 'none';
+        });
+
+        // Cargar módulo de registro al inicio
+        cambiarModulo('registro', document.querySelector('.module-btn'));
+    </script>
+</body>
+</html>
