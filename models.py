@@ -50,7 +50,10 @@ class Evento(SQLModel, table=True):
     nombre_evento: str = Field(max_length=50)
     lugar_evento: str = Field(max_length=50)
     fecha_evento: date
+<<<<<<< HEAD
     estado: str = Field(default="activo", max_length=20)
+=======
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
 
 class Servicio(SQLModel, table=True):
     __tablename__ = "servicios"
@@ -103,12 +106,15 @@ class DatosClinicos(SQLModel, table=True):
     presion_arterial: Optional[str] = Field(default=None, max_length=10)
     glicemia: Optional[float] = None
     dislipidemia: Optional[str] = Field(default=None, max_length=10)
+<<<<<<< HEAD
     estado_cognitivo: Optional[str] = Field(default=None, max_length=50)
     observaciones_cognitivas: Optional[str] = None
     estado_fisico: Optional[str] = Field(default=None, max_length=50)
     observaciones_fisicas: Optional[str] = None
     estado_mental: Optional[str] = Field(default=None, max_length=50)
     observaciones_psicologia: Optional[str] = None
+=======
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
 
 class SeguimientoTamizaje(SQLModel, table=True):
     __tablename__ = "seguimiento_tamizaje"

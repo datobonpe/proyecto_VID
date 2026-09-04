@@ -390,6 +390,7 @@
             `,
             'cardiovascular': `
                 <div class="form-grid">
+<<<<<<< HEAD
                     <div class="form-group"><label>Tabaquismo *</label><select id="d_tabaquismo"><option value="">Seleccionar...</option><option value="Si">Sí</option><option value="No">No</option></select></div>
                     <div class="form-group"><label>Dislipidemia *</label><select id="d_dislipidemia"><option value="">Seleccionar...</option><option value="Si">Sí</option><option value="No">No</option><option value="No sabe">No sabe</option></select></div>
                     <div class="form-group"><label>Peso (kg) *</label><input type="number" step="0.1" id="d_peso" oninput="calcularIMC()"></div>
@@ -397,31 +398,61 @@
                     <div class="form-group"><label>IMC</label><input type="text" id="d_imc" readonly style="background:#eee;"></div>
                     <div class="form-group"><label>Presión Arterial *</label><input type="text" id="d_pa" placeholder="Ej: 120/80"></div>
                     <div class="form-group"><label>Glicemia *</label><input type="number" id="d_glicemia"></div>
+=======
+                    <div class="form-group"><label>Género</label><select id="d_genero"><option value="">Seleccionar...</option><option value="Masculino">Masculino</option><option value="Femenino">Femenino</option></select></div>
+                    <div class="form-group"><label>Edad</label><input type="number" id="d_edad"></div>
+                    <div class="form-group"><label>Tabaquismo</label><select id="d_tabaquismo"><option value="">Seleccionar...</option><option value="Si">Sí</option><option value="No">No</option></select></div>
+                    <div class="form-group"><label>Dislipidemia</label><select id="d_dislipidemia"><option value="">Seleccionar...</option><option value="Si">Sí</option><option value="No">No</option><option value="No sabe">No sabe</option></select></div>
+                    <div class="form-group"><label>Peso (kg)</label><input type="number" step="0.1" id="d_peso" oninput="calcularIMC()"></div>
+                    <div class="form-group"><label>Talla (cm)</label><input type="number" id="d_talla" oninput="calcularIMC()"></div>
+                    <div class="form-group"><label>IMC</label><input type="text" id="d_imc" readonly style="background:#eee;"></div>
+                    <div class="form-group"><label>Presión Arterial</label><input type="text" id="d_pa" placeholder="Ej: 120/80"></div>
+                    <div class="form-group"><label>Glicemia</label><input type="number" id="d_glicemia"></div>
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
                 </div>
                 <button type="button" class="btn-submit" onclick="guardarModulo('cardiovascular')">💾 Guardar Cardiovascular</button>
             `,
             'odontologia': `
                 <div class="form-grid">
+<<<<<<< HEAD
                     <div class="form-group"><label>Servicio Odontológico *</label><select id="d_serv_odon"><option value="">Seleccionar...</option><option value="Consulta_general">Consulta General</option><option value="Limpieza">Limpieza Dental</option><option value="Extraccion">Extracción</option><option value="Restauracion">Restauración</option><option value="Radiografia">Radiografía</option><option value="Otro">Otro</option></select></div>
                     <div class="form-group"><label>Observaciones *</label><textarea id="d_obs_odon" rows="3" placeholder="Indicaciones del profesional..."></textarea></div>
+=======
+                    <div class="form-group full-width"><label>Necesidad de Servicio (Odontología)</label><input type="text" id="d_nec_odon" placeholder="Indicado por el profesional..."></div>
+                    <div class="form-group full-width"><label>Observaciones Odontológicas</label><textarea id="d_obs_odon" rows="3" placeholder="Ej: Llamar en horario de la tarde..."></textarea></div>
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
                 </div>
                 <button type="button" class="btn-submit" onclick="guardarModulo('odontologia')">💾 Guardar Odontología</button>
             `,
             'dermatologia': `
                 <div class="form-grid">
+<<<<<<< HEAD
                     <div class="form-group"><label>Servicio Dermatológico *</label><select id="d_serv_derma"><option value="">Seleccionar...</option><option value="Consulta_general">Consulta General</option><option value="Revision_lesiones">Revisión de Lesiones</option><option value="Dermatoscopia">Dermatoscopia</option><option value="Biopsia">Biopsia</option><option value="Otro">Otro</option></select></div>
                     <div class="form-group"><label>Observaciones *</label><textarea id="d_obs_derma" rows="3" placeholder="Indicaciones del profesional..."></textarea></div>
+=======
+                    <div class="form-group full-width"><label>Necesidad de Servicio (Dermatología)</label><input type="text" id="d_nec_derma" placeholder="Indicado por el profesional..."></div>
+                    <div class="form-group full-width"><label>Observaciones Dermatológicas</label><textarea id="d_obs_derma" rows="3"></textarea></div>
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
                 </div>
                 <button type="button" class="btn-submit" onclick="guardarModulo('dermatologia')">💾 Guardar Dermatología</button>
             `,
             'fisico_cognitivo': `
                 <div class="form-grid">
+<<<<<<< HEAD
                     <div class="form-group"><label>Estado Cognitivo *</label><input type="text" id="d_est_cognitivo" placeholder="Ej: Orientado, confuso..."></div>
                     <div class="form-group"><label>Observaciones Cognitivas *</label><textarea id="d_obs_cognitivo" rows="2" placeholder="Detalles del estado cognitivo..."></textarea></div>
                     <div class="form-group"><label>Estado Físico *</label><input type="text" id="d_est_fisico" placeholder="Ej: Bueno, regular..."></div>
                     <div class="form-group"><label>Observaciones Físicas *</label><textarea id="d_obs_fisico" rows="2" placeholder="Detalles del estado físico..."></textarea></div>
                     <div class="form-group"><label>Estado Mental *</label><input type="text" id="d_est_mental" placeholder="Ej: Estable, ansioso..."></div>
                     <div class="form-group"><label>Observaciones Psicología *</label><textarea id="d_obs_mental" rows="2" placeholder="Detalles del estado mental..."></textarea></div>
+=======
+                    <div class="form-group"><label>Estado Cognitivo</label><input type="text" id="d_est_cognitivo"></div>
+                    <div class="form-group"><label>Observaciones (Cognitivo)</label><textarea id="d_obs_cognitivo" rows="2"></textarea></div>
+                    <div class="form-group"><label>Estado Físico</label><input type="text" id="d_est_fisico"></div>
+                    <div class="form-group"><label>Observaciones (Física)</label><textarea id="d_obs_fisico" rows="2"></textarea></div>
+                    <div class="form-group"><label>Estado Mental</label><input type="text" id="d_est_mental"></div>
+                    <div class="form-group"><label>Observaciones (Psicología)</label><textarea id="d_obs_mental" rows="2"></textarea></div>
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
                 </div>
                 <button type="button" class="btn-submit" onclick="guardarModulo('fisico_cognitivo')">💾 Guardar Físico/Cognitivo</button>
             `,

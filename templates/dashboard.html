@@ -14,7 +14,10 @@
             --border: #dce1e3;
             --success: #2a9d8f;
             --danger: #e63946;
+<<<<<<< HEAD
             --warning: #f4a261;
+=======
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
             --sidebar-width: 280px;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
@@ -47,22 +50,74 @@
         .sidebar-btn:hover { background: rgba(255,255,255,0.2); }
         .sidebar-btn.active { background: var(--primary); }
 
+<<<<<<< HEAD
         /* Filtro de estado */
         .filtro-estado {
+=======
+        /* Formulario módulo en sidebar */
+        .form-modulo {
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
             background: rgba(255,255,255,0.1);
             padding: 15px;
             border-radius: 8px;
             margin-top: 10px;
         }
+<<<<<<< HEAD
         .filtro-estado h3 { font-size: 0.9rem; margin-bottom: 10px; }
         .filtro-estado select {
+=======
+        .form-modulo h3 { font-size: 0.9rem; margin-bottom: 10px; }
+        .form-modulo input {
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
             width: 100%;
             padding: 8px;
             border: none;
             border-radius: 4px;
             margin-bottom: 8px;
+<<<<<<< HEAD
             font-size: 0.85rem;
         }
+=======
+        }
+        .form-modulo button {
+            width: 100%;
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Lista de módulos */
+        .modulos-list {
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .modulo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+        }
+        .modulo-item span { flex: 1; }
+        .modulo-actions { display: flex; gap: 5px; }
+        .modulo-actions button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+            padding: 2px 5px;
+        }
+        .modulo-actions button:hover { text-decoration: underline; }
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
 
         /* Contenido principal */
         .main-content {
@@ -90,6 +145,7 @@
             padding: 20px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             border-left: 4px solid var(--primary);
+<<<<<<< HEAD
             position: relative;
         }
         .evento-card.estado-programado { border-left-color: var(--warning); }
@@ -112,6 +168,11 @@
         .evento-card .estado-badge.finalizado { background: #e2e3e5; color: #383d41; }
         .evento-card .estado-badge.cancelado { background: #f8d7da; color: #721c24; }
         
+=======
+        }
+        .evento-card h3 { color: var(--primary-dark); margin-bottom: 10px; font-size: 1.1rem; }
+        .evento-card .info { font-size: 0.85rem; color: #666; margin-bottom: 5px; }
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
         .evento-card .especialidades {
             display: flex;
             flex-wrap: wrap;
@@ -125,11 +186,14 @@
             border-radius: 4px;
             font-size: 0.75rem;
         }
+<<<<<<< HEAD
         .evento-card .acciones {
             display: flex;
             gap: 10px;
             margin-top: 15px;
         }
+=======
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
         .evento-card .btn-acceder {
             background: var(--primary);
             color: white;
@@ -137,6 +201,7 @@
             padding: 10px 15px;
             border-radius: 6px;
             cursor: pointer;
+<<<<<<< HEAD
             flex: 1;
             font-weight: bold;
         }
@@ -151,6 +216,13 @@
             font-weight: bold;
         }
         .evento-card .btn-editar:hover { background: #5a6268; }
+=======
+            width: 100%;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .evento-card .btn-acceder:hover { background: var(--primary-dark); }
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
 
         /* Modal */
         .modal-overlay {
@@ -168,7 +240,11 @@
             border-radius: 12px;
             padding: 30px;
             width: 90%;
+<<<<<<< HEAD
             max-width: 600px;
+=======
+            max-width: 500px;
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
             max-height: 80vh;
             overflow-y: auto;
         }
@@ -247,6 +323,7 @@
             <button class="sidebar-btn active" onclick="mostrarSeccion('eventos', this)">📋 Eventos</button>
             <button class="sidebar-btn" onclick="mostrarSeccion('crear-evento', this)">➕ Crear Evento</button>
 
+<<<<<<< HEAD
             <!-- Filtro de estado -->
             <div class="filtro-estado">
                 <h3>Filtrar por Estado</h3>
@@ -257,6 +334,30 @@
                     <option value="cancelado" {{ 'selected' if estado_actual == 'cancelado' else '' }}>Cancelados</option>
                     <option value="todos" {{ 'selected' if estado_actual == 'todos' else '' }}>Todos</option>
                 </select>
+=======
+            <!-- Formulario crear módulo -->
+            <div class="form-modulo">
+                <h3>Nuevo Módulo/Stand</h3>
+                <input type="text" id="nuevo-modulo" placeholder="Nombre del módulo">
+                <button onclick="crearModulo()">Agregar</button>
+            </div>
+
+            <!-- Lista de módulos existentes -->
+            <div class="modulos-list" id="lista-modulos-sidebar">
+                <!-- Se carga dinámicamente -->
+            </div>
+
+            <!-- Formulario crear experiencia VID -->
+            <div class="form-modulo" style="margin-top: 15px;">
+                <h3>✨ Nueva Experiencia VID</h3>
+                <input type="text" id="nueva-experiencia" placeholder="Nombre de la experiencia">
+                <button onclick="crearExperiencia()">Agregar</button>
+            </div>
+
+            <!-- Lista de experiencias existentes -->
+            <div class="modulos-list" id="lista-experiencias-sidebar">
+                <!-- Se carga dinámicamente -->
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
             </div>
         </aside>
 
@@ -265,6 +366,7 @@
             <!-- Sección: Lista de eventos -->
             <div id="seccion-eventos">
                 <div class="header">
+<<<<<<< HEAD
                     <h1>Eventos</h1>
                 </div>
                 <div id="eventos-container" class="eventos-grid">
@@ -288,6 +390,12 @@
                     {% if not eventos %}
                     <div class="no-eventos">No hay eventos {{ estado_actual }}s. Cree uno nuevo desde el sidebar.</div>
                     {% endif %}
+=======
+                    <h1>Eventos Activos</h1>
+                </div>
+                <div id="eventos-container" class="eventos-grid">
+                    <!-- Tarjetas de eventos se cargan dinámicamente -->
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
                 </div>
             </div>
 
@@ -312,7 +420,11 @@
                         </div>
                         <div class="form-group">
                             <label>Obra </label>
+<<<<<<< HEAD
                             <select name="id_obra">
+=======
+                            <select name="id_obra" >
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
                                 <option value="">Seleccione una obra...</option>
                                 {% for obra in obras %}
                                 <option value="{{ obra.id_obra }}">{{ obra.nombre_obra }}</option>
@@ -329,10 +441,17 @@
                         <div class="form-group" style="margin-top: 15px; padding: 12px; background: rgba(0, 119, 182, 0.05); border-radius: 8px; border: 1px dashed var(--primary);">
                             <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 0;">
                                 <input type="checkbox" id="check-habilitar-experiencias" onchange="toggleSeccionExperiencias(this.checked)" style="width: auto;">
+<<<<<<< HEAD
                                 <span style="font-weight: 600; color: var(--primary-dark);">✨ Incluir Experiencias VID en este evento</span>
                             </label>
                             <div id="grupo-experiencias" style="display: none; margin-top: 12px;">
                                 <label style="font-size: 0.85rem; color: #555;">Seleccione las experiencias disponibles:</label>
+=======
+                                <span style="font-weight: 600; color: var(--primary-dark);">✨ Habilitar pestaña de Experiencias VID en este evento</span>
+                            </label>
+                            <div id="grupo-experiencias" style="display: none; margin-top: 12px;">
+                                <label style="font-size: 0.85rem; color: #555;">Seleccione las actividades que estarán disponibles:</label>
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
                                 <input type="text" class="search-filter" id="filter-experiencias" placeholder="Buscar experiencia..." oninput="filtrarExperiencias()">
                                 <div class="multi-select" id="lista-experiencias">
                                     <!-- Checkboxes se cargan dinámicamente -->
@@ -346,6 +465,7 @@
                     </form>
                 </div>
             </div>
+<<<<<<< HEAD
 
             <!-- Sección: Editar evento -->
             <div id="seccion-editar-evento" style="display: none;">
@@ -412,14 +532,21 @@
                     </form>
                 </div>
             </div>
+=======
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
         </main>
     </div>
 
     <!-- Modal de éxito -->
     <div class="modal-overlay" id="modal-exito">
         <div class="modal">
+<<<<<<< HEAD
             <h2>✅ Operación Exitosa</h2>
             <p id="modal-mensaje">La operación se ha completado exitosamente.</p>
+=======
+            <h2>✅ Evento Creado</h2>
+            <p>El evento se ha creado exitosamente.</p>
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
             <div class="btn-group">
                 <button class="btn-submit" onclick="cerrarModal()">Cerrar</button>
             </div>
@@ -427,14 +554,25 @@
     </div>
 
     <script>
+<<<<<<< HEAD
         // Datos del servidor
         const eventosData = {{ eventos|tojson }};
         const estadoActual = "{{ estado_actual }}";
+=======
+        // Cargar eventos al iniciar
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarEventos();
+            cargarModulosSidebar();
+        });
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
 
         function mostrarSeccion(seccion, btnElement = null) {
             document.getElementById('seccion-eventos').style.display = seccion === 'eventos' ? 'block' : 'none';
             document.getElementById('seccion-crear-evento').style.display = seccion === 'crear-evento' ? 'block' : 'none';
+<<<<<<< HEAD
             document.getElementById('seccion-editar-evento').style.display = seccion === 'editar-evento' ? 'block' : 'none';
+=======
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
 
             const botones = document.querySelectorAll('.sidebar-btn');
             botones.forEach(btn => btn.classList.remove('active'));
@@ -447,6 +585,7 @@
             }
 
             if (seccion === 'crear-evento') {
+<<<<<<< HEAD
                 cargarModulosCrear();
                 cargarExperienciasCrear();
             }
@@ -458,10 +597,48 @@
         }
 
         async function cargarModulosCrear() {
+=======
+                cargarModulos();
+            }
+        }
+
+        async function cargarEventos() {
+            const container = document.getElementById('eventos-container');
+            try {
+                const response = await fetch('/eventos');
+                const eventos = await response.json();
+
+                if (eventos.length === 0) {
+                    container.innerHTML = '<div class="no-eventos">No hay eventos creados. Cree uno nuevo desde el sidebar.</div>';
+                    return;
+                }
+
+                container.innerHTML = eventos.map(evento => `
+                    <div class="evento-card">
+                        <h3>${evento.nombre_evento}</h3>
+                        <p class="info">📍 ${evento.lugar_evento}</p>
+                        <p class="info">📅 ${evento.fecha_evento}</p>
+                        <div class="especialidades">
+                            ${evento.modulos.map(mod => `<span class="tag">${mod}</span>`).join('')}
+                        </div>
+                        <button class="btn-acceder" onclick="accederEvento(${evento.id_evento})">Acceder al Evento</button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                container.innerHTML = '<div class="no-eventos">Error al cargar eventos.</div>';
+            }
+        }
+
+        async function cargarModulos() {
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
             const container = document.getElementById('lista-modulos');
             try {
                 const response = await fetch('/modulos');
                 const modulos = await response.json();
+<<<<<<< HEAD
+=======
+
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
                 container.innerHTML = modulos.map(mod => `
                     <label>
                         <input type="checkbox" name="modulos" value="${mod.id_especialidad}">
@@ -473,6 +650,7 @@
             }
         }
 
+<<<<<<< HEAD
         async function cargarExperienciasCrear() {
             const container = document.getElementById('lista-experiencias');
             try {
@@ -486,6 +664,30 @@
                 `).join('');
             } catch (error) {
                 container.innerHTML = '<p>Error al cargar experiencias.</p>';
+=======
+        async function cargarModulosSidebar() {
+            const container = document.getElementById('lista-modulos-sidebar');
+            try {
+                const response = await fetch('/modulos');
+                const modulos = await response.json();
+
+                if (modulos.length === 0) {
+                    container.innerHTML = '<p style="font-size:0.8rem; opacity:0.7;">No hay módulos creados</p>';
+                    return;
+                }
+
+                container.innerHTML = modulos.map(mod => `
+                    <div class="modulo-item">
+                        <span>${mod.nombre_modulo}</span>
+                        <div class="modulo-actions">
+                            <button onclick="editarModulo(${mod.id_especialidad}, '${mod.nombre_modulo}')">✏️</button>
+                            <button onclick="eliminarModulo(${mod.id_especialidad})">🗑️</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                container.innerHTML = '<p style="font-size:0.8rem; opacity:0.7;">Error al cargar</p>';
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
             }
         }
 
@@ -498,6 +700,7 @@
             });
         }
 
+<<<<<<< HEAD
         function filtrarExperiencias() {
             const filtro = document.getElementById('filter-experiencias').value.toLowerCase();
             const labels = document.querySelectorAll('#lista-experiencias label');
@@ -511,16 +714,23 @@
             document.getElementById('grupo-experiencias').style.display = checked ? 'block' : 'none';
         }
 
+=======
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
         async function crearEvento(e) {
             e.preventDefault();
             const form = e.target;
             const formData = new FormData(form);
 
+<<<<<<< HEAD
             const checkboxesModulos = document.querySelectorAll('input[name="modulos"]:checked');
             const modulos = Array.from(checkboxesModulos).map(cb => parseInt(cb.value));
 
             const checkboxesExperiencias = document.querySelectorAll('input[name="experiencias"]:checked');
             const experiencias = Array.from(checkboxesExperiencias).map(cb => parseInt(cb.value));
+=======
+            const checkboxes = document.querySelectorAll('input[name="modulos"]:checked');
+            const modulos = Array.from(checkboxes).map(cb => parseInt(cb.value));
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
 
             const idObraVal = formData.get('id_obra');
 
@@ -529,8 +739,12 @@
                 lugar_evento: formData.get('lugar_evento'),
                 fecha_evento: formData.get('fecha_evento'),
                 id_obra: idObraVal ? parseInt(idObraVal) : null,
+<<<<<<< HEAD
                 modulos: modulos,
                 experiencias: experiencias
+=======
+                modulos: modulos
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
             };
 
             try {
@@ -542,8 +756,14 @@
 
                 if (response.ok) {
                     form.reset();
+<<<<<<< HEAD
                     mostrarModal('Evento creado exitosamente');
                     setTimeout(() => window.location.reload(), 1500);
+=======
+                    mostrarSeccion('eventos');
+                    await cargarEventos();
+                    document.getElementById('modal-exito').classList.add('active');
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
                 } else {
                     const result = await response.json().catch(() => ({}));
                     const msg = result.detail 
@@ -557,6 +777,7 @@
             }
         }
 
+<<<<<<< HEAD
         async function editarEvento(id) {
             try {
                 const response = await fetch(`/evento_detalle/${id}`);
@@ -671,6 +892,65 @@
                 }
             } catch (error) {
                 alert('Error al guardar los cambios');
+=======
+        async function crearModulo() {
+            const nombre = document.getElementById('nuevo-modulo').value.trim();
+
+            if (!nombre) {
+                alert('Ingrese el nombre del módulo');
+                return;
+            }
+
+            try {
+                const response = await fetch('/crear_modulo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre_modulo: nombre })
+                });
+
+                if (response.ok) {
+                    document.getElementById('nuevo-modulo').value = '';
+                    cargarModulosSidebar();
+                    alert('Módulo creado exitosamente');
+                }
+            } catch (error) {
+                alert('Error al crear el módulo');
+            }
+        }
+
+        async function editarModulo(id, nombreActual) {
+            const nuevoNombre = prompt('Editar nombre del módulo:', nombreActual);
+            if (nuevoNombre === null || nuevoNombre.trim() === '') return;
+
+            try {
+                const response = await fetch(`/modulos/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre_modulo: nuevoNombre.trim() })
+                });
+
+                if (response.ok) {
+                    cargarModulosSidebar();
+                }
+            } catch (error) {
+                alert('Error al editar el módulo');
+            }
+        }
+
+        async function eliminarModulo(id) {
+            if (!confirm('¿Está seguro de eliminar este módulo?')) return;
+
+            try {
+                const response = await fetch(`/modulos/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    cargarModulosSidebar();
+                }
+            } catch (error) {
+                alert('Error al eliminar el módulo');
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
             }
         }
 
@@ -678,11 +958,14 @@
             window.location.href = `/evento/${id}`;
         }
 
+<<<<<<< HEAD
         function mostrarModal(mensaje) {
             document.getElementById('modal-mensaje').textContent = mensaje;
             document.getElementById('modal-exito').classList.add('active');
         }
 
+=======
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
         function cerrarModal() {
             document.getElementById('modal-exito').classList.remove('active');
         }

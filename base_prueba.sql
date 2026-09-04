@@ -43,8 +43,12 @@ CREATE TABLE IF NOT EXISTS eventos (
     id_obra INTEGER REFERENCES obras(id_obra) ON DELETE RESTRICT,
     nombre_evento VARCHAR(50) NOT NULL,
     lugar_evento VARCHAR(50) NOT NULL,
+<<<<<<< HEAD
     fecha_evento DATE NOT NULL,
     estado VARCHAR(20) DEFAULT 'programado' CHECK (estado IN ('programado', 'activo', 'finalizado', 'cancelado'))
+=======
+    fecha_evento DATE NOT NULL
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
 );
 
 CREATE TABLE IF NOT EXISTS servicios (
@@ -117,6 +121,7 @@ CREATE TABLE IF NOT EXISTS datos_clinicos (
     fumador BOOLEAN,
     presion_arterial VARCHAR(10),  
     glicemia NUMERIC(5, 2),         
+<<<<<<< HEAD
     dislipidemia VARCHAR(10),
     estado_cognitivo VARCHAR(50),
     observaciones_cognitivas TEXT,
@@ -124,6 +129,9 @@ CREATE TABLE IF NOT EXISTS datos_clinicos (
     observaciones_fisicas TEXT,
     estado_mental VARCHAR(50),
     observaciones_psicologia TEXT
+=======
+    dislipidemia VARCHAR(10)
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
 );
 
 CREATE TABLE IF NOT EXISTS seguimiento_tamizaje (

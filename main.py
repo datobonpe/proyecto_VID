@@ -19,6 +19,7 @@ class EventoCreate(BaseModel):
     modulos: List[int] = []
     experiencias: List[int] = []
 
+<<<<<<< HEAD
 class EventoUpdate(BaseModel):
     nombre_evento: str
     lugar_evento: str
@@ -30,6 +31,8 @@ class EventoUpdate(BaseModel):
 class EventoEstado(BaseModel):
     estado: str
 
+=======
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
 class ModuloCreate(BaseModel):
     nombre_modulo: str
 
@@ -72,6 +75,7 @@ app = FastAPI(title="Ruta del Cuidado VID")
 templates = Jinja2Templates(directory="templates")
 
 @app.get("/dashboard", response_class=HTMLResponse)
+<<<<<<< HEAD
 def cargar_dashboard(request: Request, estado: str = Query("activo", regex="^(activo|programado|finalizado|cancelado|todos)$"), db: Session = Depends(get_session)):
     obras = db.exec(select(Obra)).all()
     
@@ -107,12 +111,21 @@ def cargar_dashboard(request: Request, estado: str = Query("activo", regex="^(ac
         request=request, 
         name="dashboard.html", 
         context={"obras": obras, "eventos": eventos_data, "estado_actual": estado}
+=======
+def cargar_dashboard(request: Request, db: Session = Depends(get_session)):
+    obras = db.exec(select(Obra)).all()
+    return templates.TemplateResponse(
+        request=request, 
+        name="dashboard.html", 
+        context={"obras": obras}
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
     )
 
 @app.get("/eventos")
 def listar_eventos(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
+<<<<<<< HEAD
     estado: Optional[str] = Query(None, regex="^(activo|programado|finalizado|cancelado)$"),
     db: Session = Depends(get_session)
 ):
@@ -120,6 +133,11 @@ def listar_eventos(
     if estado:
         query = query.where(Evento.estado == estado)
     eventos = db.exec(query.offset(skip).limit(limit)).all()
+=======
+    db: Session = Depends(get_session)
+):
+    eventos = db.exec(select(Evento).offset(skip).limit(limit)).all()
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
     lista = []
     for e in eventos:
         modulos = db.exec(
@@ -138,7 +156,10 @@ def listar_eventos(
             "lugar_evento": e.lugar_evento,
             "fecha_evento": str(e.fecha_evento),
             "id_obra": e.id_obra,
+<<<<<<< HEAD
             "estado": e.estado,
+=======
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
             "modulos": modulos,
             "experiencias": experiencias
         })
@@ -150,8 +171,12 @@ def crear_evento(data: EventoCreate, db: Session = Depends(get_session)):
         nombre_evento=data.nombre_evento,
         lugar_evento=data.lugar_evento,
         fecha_evento=data.fecha_evento,
+<<<<<<< HEAD
         id_obra=data.id_obra,
         estado="programado"
+=======
+        id_obra=data.id_obra
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
     )
     db.add(nuevo_evento)
     db.commit()
@@ -175,6 +200,7 @@ def crear_evento(data: EventoCreate, db: Session = Depends(get_session)):
 
     return {"message": "Evento creado exitosamente", "id_evento": nuevo_evento.id_evento}
 
+<<<<<<< HEAD
 @app.put("/editar_evento/{evento_id}")
 def editar_evento(evento_id: int, data: EventoUpdate, db: Session = Depends(get_session)):
     evento = db.exec(select(Evento).where(Evento.id_evento == evento_id)).first()
@@ -254,6 +280,8 @@ def obtener_evento_detalle(evento_id: int, db: Session = Depends(get_session)):
         "experiencias": [{"id": e[0], "nombre": e[1]} for e in experiencias]
     }
 
+=======
+>>>>>>> e589c8f454b86b247de2ec1645d19d34353e1de2
 @app.get("/modulos")
 def listar_modulos(
     skip: int = Query(0, ge=0),
