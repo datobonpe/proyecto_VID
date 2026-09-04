@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrativo - Organización VID</title>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <style>
+        :root {
+            --primary: #0077b6;
+            --primary-dark: #023e8a;
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --border: #dce1e3;
+            --success: #2a9d8f;
+            --danger: #e63946;
+            --warning: #f4a261;
+            --sidebar-width: 280px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg); color: #333; }
+
+        .layout { display: flex; min-height: 100vh; }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--primary-dark);
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .sidebar h2 { font-size: 1.2rem; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 10px; }
+        .sidebar-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+        .sidebar-btn:hover { background: rgba(255,255,255,0.2); }
+        .sidebar-btn.active { background: var(--primary); }
+
+        /* Filtro de estado */
+        .filtro-estado {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        .filtro-estado h3 { font-size: 0.9rem; margin-bottom: 10px; }
+        .filtro-estado select {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+
+        /* Contenido principal */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .header h1 { color: var(--primary-dark); font-size: 1.5rem; }
+
+        /* Tarjetas de eventos */
+        .eventos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .evento-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border-left: 4px solid var(--primary);
+            position: relative;
+        }
+        .evento-card.estado-programado { border-left-color: var(--warning); }
+        .evento-card.estado-activo { border-left-color: var(--success); }
+        .evento-card.estado-finalizado { border-left-color: #999; }
+        .evento-card.estado-cancelado { border-left-color: var(--danger); }
+        
+        .evento-card h3 { color: var(--primary-dark); margin-bottom: 10px; font-size: 1.1rem; }
+        .evento-card .info { font-size: 0.85rem; color: #666; margin-bottom: 5px; }
+        .evento-card .estado-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .evento-card .estado-badge.programado { background: #fff3cd; color: #856404; }
+        .evento-card .estado-badge.activo { background: #d4edda; color: #155724; }
+        .evento-card .estado-badge.finalizado { background: #e2e3e5; color: #383d41; }
+        .evento-card .estado-badge.cancelado { background: #f8d7da; color: #721c24; }
+        
+        .evento-card .especialidades {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        .evento-card .tag {
+            background: #e3f2fd;
+            color: var(--primary-dark);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+        .evento-card .acciones {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .evento-card .btn-acceder {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            flex: 1;
+            font-weight: bold;
+        }
+        .evento-card .btn-acceder:hover { background: var(--primary-dark); }
+        .evento-card .btn-editar {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .evento-card .btn-editar:hover { background: #5a6268; }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal h2 { color: var(--primary-dark); margin-bottom: 20px; }
+        .modal .form-group { margin-bottom: 15px; }
+        .modal label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
+        .modal input, .modal select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        .modal .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        .modal .btn-cancel {
+            flex: 1;
+            background: #ccc;
+            color: #333;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .modal .btn-submit {
+            flex: 1;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Multi-select */
+        .multi-select {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .multi-select label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 0;
+            font-weight: normal;
+            cursor: pointer;
+        }
+        .multi-select label:hover { background: #f5f5f5; }
+        .search-filter {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+        }
+
+        /* Sin eventos */
+        .no-eventos {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+            background: var(--card-bg);
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h2>Gestión de Eventos</h2>
+            <button class="sidebar-btn active" onclick="mostrarSeccion('eventos', this)">📋 Eventos</button>
+            <button class="sidebar-btn" onclick="mostrarSeccion('crear-evento', this)">➕ Crear Evento</button>
+
+            <!-- Filtro de estado -->
+            <div class="filtro-estado">
+                <h3>Filtrar por Estado</h3>
+                <select id="filtro-estado" onchange="filtrarPorEstado()">
+                    <option value="activo" {{ 'selected' if estado_actual == 'activo' else '' }}>Activos</option>
+                    <option value="programado" {{ 'selected' if estado_actual == 'programado' else '' }}>Programados</option>
+                    <option value="finalizado" {{ 'selected' if estado_actual == 'finalizado' else '' }}>Finalizados</option>
+                    <option value="cancelado" {{ 'selected' if estado_actual == 'cancelado' else '' }}>Cancelados</option>
+                    <option value="todos" {{ 'selected' if estado_actual == 'todos' else '' }}>Todos</option>
+                </select>
+            </div>
+        </aside>
+
+        <!-- Contenido principal -->
+        <main class="main-content">
+            <!-- Sección: Lista de eventos -->
+            <div id="seccion-eventos">
+                <div class="header">
+                    <h1>Eventos</h1>
+                </div>
+                <div id="eventos-container" class="eventos-grid">
+                    {% for evento in eventos %}
+                    <div class="evento-card estado-{{ evento.estado }}">
+                        <h3>{{ evento.nombre_evento }}</h3>
+                        <span class="estado-badge {{ evento.estado }}">{{ evento.estado|capitalize }}</span>
+                        <p class="info">📍 {{ evento.lugar_evento }}</p>
+                        <p class="info">📅 {{ evento.fecha_evento }}</p>
+                        <div class="especialidades">
+                            {% for mod in evento.modulos %}
+                            <span class="tag">{{ mod }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="acciones">
+                            <button class="btn-acceder" onclick="accederEvento({{ evento.id_evento }})">Acceder</button>
+                            <button class="btn-editar" onclick="editarEvento({{ evento.id_evento }})">✏️ Editar</button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% if not eventos %}
+                    <div class="no-eventos">No hay eventos {{ estado_actual }}s. Cree uno nuevo desde el sidebar.</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Sección: Crear evento -->
+            <div id="seccion-crear-evento" style="display: none;">
+                <div class="header">
+                    <h1>Crear Nuevo Evento</h1>
+                </div>
+                <div style="background: var(--card-bg); padding: 25px; border-radius: 12px; max-width: 600px;">
+                    <form id="form-crear-evento" onsubmit="crearEvento(event)">
+                        <div class="form-group">
+                            <label>Nombre del Evento *</label>
+                            <input type="text" name="nombre_evento" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Lugar del Evento *</label>
+                            <input type="text" name="lugar_evento" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha del Evento *</label>
+                            <input type="date" name="fecha_evento" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Obra </label>
+                            <select name="id_obra">
+                                <option value="">Seleccione una obra...</option>
+                                {% for obra in obras %}
+                                <option value="{{ obra.id_obra }}">{{ obra.nombre_obra }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Módulos/Stands Participantes</label>
+                            <input type="text" class="search-filter" id="filter-modulos" placeholder="Buscar módulo..." oninput="filtrarModulos()">
+                            <div class="multi-select" id="lista-modulos">
+                                <!-- Checkboxes se cargan dinámicamente -->
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 15px; padding: 12px; background: rgba(0, 119, 182, 0.05); border-radius: 8px; border: 1px dashed var(--primary);">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 0;">
+                                <input type="checkbox" id="check-habilitar-experiencias" onchange="toggleSeccionExperiencias(this.checked)" style="width: auto;">
+                                <span style="font-weight: 600; color: var(--primary-dark);">✨ Incluir Experiencias VID en este evento</span>
+                            </label>
+                            <div id="grupo-experiencias" style="display: none; margin-top: 12px;">
+                                <label style="font-size: 0.85rem; color: #555;">Seleccione las experiencias disponibles:</label>
+                                <input type="text" class="search-filter" id="filter-experiencias" placeholder="Buscar experiencia..." oninput="filtrarExperiencias()">
+                                <div class="multi-select" id="lista-experiencias">
+                                    <!-- Checkboxes se cargan dinámicamente -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button type="button" class="btn-cancel" onclick="mostrarSeccion('eventos')">Cancelar</button>
+                            <button type="submit" class="btn-submit">Crear Evento</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Sección: Editar evento -->
+            <div id="seccion-editar-evento" style="display: none;">
+                <div class="header">
+                    <h1>Editar Evento</h1>
+                </div>
+                <div style="background: var(--card-bg); padding: 25px; border-radius: 12px; max-width: 600px;">
+                    <form id="form-editar-evento" onsubmit="guardarEdicionEvento(event)">
+                        <input type="hidden" id="edit-id-evento">
+                        <div class="form-group">
+                            <label>Nombre del Evento *</label>
+                            <input type="text" id="edit-nombre-evento" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Lugar del Evento *</label>
+                            <input type="text" id="edit-lugar-evento" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha del Evento *</label>
+                            <input type="date" id="edit-fecha-evento" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Obra </label>
+                            <select id="edit-id-obra">
+                                <option value="">Seleccione una obra...</option>
+                                {% for obra in obras %}
+                                <option value="{{ obra.id_obra }}">{{ obra.nombre_obra }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Estado del Evento *</label>
+                            <select id="edit-estado-evento">
+                                <option value="programado">Programado</option>
+                                <option value="activo">Activo</option>
+                                <option value="finalizado">Finalizado</option>
+                                <option value="cancelado">Cancelado</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Módulos/Stands Participantes</label>
+                            <input type="text" class="search-filter" id="edit-filter-modulos" placeholder="Buscar módulo..." oninput="filtrarModulosEdicion()">
+                            <div class="multi-select" id="edit-lista-modulos">
+                                <!-- Checkboxes se cargan dinámicamente -->
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 15px; padding: 12px; background: rgba(0, 119, 182, 0.05); border-radius: 8px; border: 1px dashed var(--primary);">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 0;">
+                                <input type="checkbox" id="edit-check-experiencias" onchange="toggleSeccionExperienciasEdicion(this.checked)" style="width: auto;">
+                                <span style="font-weight: 600; color: var(--primary-dark);">✨ Incluir Experiencias VID en este evento</span>
+                            </label>
+                            <div id="edit-grupo-experiencias" style="display: none; margin-top: 12px;">
+                                <label style="font-size: 0.85rem; color: #555;">Seleccione las experiencias disponibles:</label>
+                                <input type="text" class="search-filter" id="edit-filter-experiencias" placeholder="Buscar experiencia..." oninput="filtrarExperienciasEdicion()">
+                                <div class="multi-select" id="edit-lista-experiencias">
+                                    <!-- Checkboxes se cargan dinámicamente -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button type="button" class="btn-cancel" onclick="mostrarSeccion('eventos')">Cancelar</button>
+                            <button type="submit" class="btn-submit">Guardar Cambios</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de éxito -->
+    <div class="modal-overlay" id="modal-exito">
+        <div class="modal">
+            <h2>✅ Operación Exitosa</h2>
+            <p id="modal-mensaje">La operación se ha completado exitosamente.</p>
+            <div class="btn-group">
+                <button class="btn-submit" onclick="cerrarModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Datos del servidor
+        const eventosData = {{ eventos|tojson }};
+        const estadoActual = "{{ estado_actual }}";
+
+        function mostrarSeccion(seccion, btnElement = null) {
+            document.getElementById('seccion-eventos').style.display = seccion === 'eventos' ? 'block' : 'none';
+            document.getElementById('seccion-crear-evento').style.display = seccion === 'crear-evento' ? 'block' : 'none';
+            document.getElementById('seccion-editar-evento').style.display = seccion === 'editar-evento' ? 'block' : 'none';
+
+            const botones = document.querySelectorAll('.sidebar-btn');
+            botones.forEach(btn => btn.classList.remove('active'));
+
+            if (btnElement) {
+                btnElement.classList.add('active');
+            } else {
+                if (seccion === 'eventos' && botones[0]) botones[0].classList.add('active');
+                if (seccion === 'crear-evento' && botones[1]) botones[1].classList.add('active');
+            }
+
+            if (seccion === 'crear-evento') {
+                cargarModulosCrear();
+                cargarExperienciasCrear();
+            }
+        }
+
+        function filtrarPorEstado() {
+            const estado = document.getElementById('filtro-estado').value;
+            window.location.href = `/dashboard?estado=${estado}`;
+        }
+
+        async function cargarModulosCrear() {
+            const container = document.getElementById('lista-modulos');
+            try {
+                const response = await fetch('/modulos');
+                const modulos = await response.json();
+                container.innerHTML = modulos.map(mod => `
+                    <label>
+                        <input type="checkbox" name="modulos" value="${mod.id_especialidad}">
+                        ${mod.nombre_modulo}
+                    </label>
+                `).join('');
+            } catch (error) {
+                container.innerHTML = '<p>Error al cargar módulos.</p>';
+            }
+        }
+
+        async function cargarExperienciasCrear() {
+            const container = document.getElementById('lista-experiencias');
+            try {
+                const response = await fetch('/experiencias');
+                const experiencias = await response.json();
+                container.innerHTML = experiencias.map(exp => `
+                    <label>
+                        <input type="checkbox" name="experiencias" value="${exp.id_experiencia}">
+                        ${exp.nombre_experiencia}
+                    </label>
+                `).join('');
+            } catch (error) {
+                container.innerHTML = '<p>Error al cargar experiencias.</p>';
+            }
+        }
+
+        function filtrarModulos() {
+            const filtro = document.getElementById('filter-modulos').value.toLowerCase();
+            const labels = document.querySelectorAll('#lista-modulos label');
+            labels.forEach(label => {
+                const texto = label.textContent.toLowerCase();
+                label.style.display = texto.includes(filtro) ? 'flex' : 'none';
+            });
+        }
+
+        function filtrarExperiencias() {
+            const filtro = document.getElementById('filter-experiencias').value.toLowerCase();
+            const labels = document.querySelectorAll('#lista-experiencias label');
+            labels.forEach(label => {
+                const texto = label.textContent.toLowerCase();
+                label.style.display = texto.includes(filtro) ? 'flex' : 'none';
+            });
+        }
+
+        function toggleSeccionExperiencias(checked) {
+            document.getElementById('grupo-experiencias').style.display = checked ? 'block' : 'none';
+        }
+
+        async function crearEvento(e) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+
+            const checkboxesModulos = document.querySelectorAll('input[name="modulos"]:checked');
+            const modulos = Array.from(checkboxesModulos).map(cb => parseInt(cb.value));
+
+            const checkboxesExperiencias = document.querySelectorAll('input[name="experiencias"]:checked');
+            const experiencias = Array.from(checkboxesExperiencias).map(cb => parseInt(cb.value));
+
+            const idObraVal = formData.get('id_obra');
+
+            const data = {
+                nombre_evento: formData.get('nombre_evento'),
+                lugar_evento: formData.get('lugar_evento'),
+                fecha_evento: formData.get('fecha_evento'),
+                id_obra: idObraVal ? parseInt(idObraVal) : null,
+                modulos: modulos,
+                experiencias: experiencias
+            };
+
+            try {
+                const response = await fetch('/crear_evento', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    form.reset();
+                    mostrarModal('Evento creado exitosamente');
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    const result = await response.json().catch(() => ({}));
+                    const msg = result.detail 
+                        ? (Array.isArray(result.detail) ? result.detail.map(d => d.msg).join(', ') : JSON.stringify(result.detail)) 
+                        : (result.message || 'Error en el servidor');
+                    alert(`Error al crear el evento: ${msg}`);
+                }
+            } catch (error) {
+                console.error('Error al crear el evento:', error);
+                alert('Error al crear el evento: ' + (error.message || 'Error de conexión'));
+            }
+        }
+
+        async function editarEvento(id) {
+            try {
+                const response = await fetch(`/evento_detalle/${id}`);
+                const evento = await response.json();
+
+                document.getElementById('edit-id-evento').value = evento.id_evento;
+                document.getElementById('edit-nombre-evento').value = evento.nombre_evento;
+                document.getElementById('edit-lugar-evento').value = evento.lugar_evento;
+                document.getElementById('edit-fecha-evento').value = evento.fecha_evento;
+                document.getElementById('edit-id-obra').value = evento.id_obra || '';
+                document.getElementById('edit-estado-evento').value = evento.estado;
+
+                // Cargar módulos
+                const responseModulos = await fetch('/modulos');
+                const todosModulos = await responseModulos.json();
+                const modulosAsignados = evento.modulos.map(m => m.id);
+                
+                document.getElementById('edit-lista-modulos').innerHTML = todosModulos.map(mod => `
+                    <label>
+                        <input type="checkbox" name="modulos" value="${mod.id_especialidad}" ${modulosAsignados.includes(mod.id_especialidad) ? 'checked' : ''}>
+                        ${mod.nombre_modulo}
+                    </label>
+                `).join('');
+
+                // Cargar experiencias
+                const responseExperiencias = await fetch('/experiencias');
+                const todasExperiencias = await responseExperiencias.json();
+                const experienciasAsignadas = evento.experiencias.map(e => e.id);
+                
+                document.getElementById('edit-lista-experiencias').innerHTML = todasExperiencias.map(exp => `
+                    <label>
+                        <input type="checkbox" name="experiencias" value="${exp.id_experiencia}" ${experienciasAsignadas.includes(exp.id_experiencia) ? 'checked' : ''}>
+                        ${exp.nombre_experiencia}
+                    </label>
+                `).join('');
+
+                // Mostrar/ocultar experiencias
+                const tieneExperiencias = experienciasAsignadas.length > 0;
+                document.getElementById('edit-check-experiencias').checked = tieneExperiencias;
+                document.getElementById('edit-grupo-experiencias').style.display = tieneExperiencias ? 'block' : 'none';
+
+                mostrarSeccion('editar-evento');
+            } catch (error) {
+                alert('Error al cargar los datos del evento');
+            }
+        }
+
+        function filtrarModulosEdicion() {
+            const filtro = document.getElementById('edit-filter-modulos').value.toLowerCase();
+            const labels = document.querySelectorAll('#edit-lista-modulos label');
+            labels.forEach(label => {
+                const texto = label.textContent.toLowerCase();
+                label.style.display = texto.includes(filtro) ? 'flex' : 'none';
+            });
+        }
+
+        function filtrarExperienciasEdicion() {
+            const filtro = document.getElementById('edit-filter-experiencias').value.toLowerCase();
+            const labels = document.querySelectorAll('#edit-lista-experiencias label');
+            labels.forEach(label => {
+                const texto = label.textContent.toLowerCase();
+                label.style.display = texto.includes(filtro) ? 'flex' : 'none';
+            });
+        }
+
+        function toggleSeccionExperienciasEdicion(checked) {
+            document.getElementById('edit-grupo-experiencias').style.display = checked ? 'block' : 'none';
+        }
+
+        async function guardarEdicionEvento(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-id-evento').value;
+
+            const checkboxesModulos = document.querySelectorAll('#edit-lista-modulos input[name="modulos"]:checked');
+            const modulos = Array.from(checkboxesModulos).map(cb => parseInt(cb.value));
+
+            const checkboxesExperiencias = document.querySelectorAll('#edit-lista-experiencias input[name="experiencias"]:checked');
+            const experiencias = Array.from(checkboxesExperiencias).map(cb => parseInt(cb.value));
+
+            const idObraVal = document.getElementById('edit-id-obra').value;
+
+            const data = {
+                nombre_evento: document.getElementById('edit-nombre-evento').value,
+                lugar_evento: document.getElementById('edit-lugar-evento').value,
+                fecha_evento: document.getElementById('edit-fecha-evento').value,
+                id_obra: idObraVal ? parseInt(idObraVal) : null,
+                modulos: modulos,
+                experiencias: experiencias
+            };
+
+            try {
+                const response = await fetch(`/editar_evento/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    // Actualizar estado por separado
+                    const nuevoEstado = document.getElementById('edit-estado-evento').value;
+                    await fetch(`/evento_estado/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ estado: nuevoEstado })
+                    });
+
+                    mostrarModal('Evento actualizado exitosamente');
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    const result = await response.json().catch(() => ({}));
+                    alert(`Error al actualizar: ${result.message || 'Error desconocido'}`);
+                }
+            } catch (error) {
+                alert('Error al guardar los cambios');
+            }
+        }
+
+        function accederEvento(id) {
+            window.location.href = `/evento/${id}`;
+        }
+
+        function mostrarModal(mensaje) {
+            document.getElementById('modal-mensaje').textContent = mensaje;
+            document.getElementById('modal-exito').classList.add('active');
+        }
+
+        function cerrarModal() {
+            document.getElementById('modal-exito').classList.remove('active');
+        }
+    </script>
+</body>
+</html>

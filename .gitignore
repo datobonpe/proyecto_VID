@@ -1,0 +1,51 @@
+# Entornos virtuales
+.venv/
+venv/
+env/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Variables de entorno y secretos
+.env
+.env.*
+!.env.example
+
+# FastAPI / desarrollo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Archivos temporales
+*.tmp
+*.temp
+
+# Builds / distribución
+build/
+dist/
+*.egg-info/
+
+# Cobertura
+.coverage
+htmlcov/
+
+# Bases de datos locales
+*.sqlite
+*.sqlite3
